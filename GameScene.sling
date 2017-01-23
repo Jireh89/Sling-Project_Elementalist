@@ -1,0 +1,23 @@
+class is SpriteSceneWithEntities imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var stage as int
+var firstElement as int
+var secondElement as int
+
+ctor(st as int, f as int, se as int)
+{
+	stage = st
+	firstElement = f
+	secondElement = se
+}
+
+func initialize override
+{
+	base.initialize()
+	height = getReferenceHeight()
+	width = getReferenceWidth()
+	var backgroundSprite = addTextureSpriteForSize(createTextureForImageResource("background"), width, height)
+	backgroundSprite.move(0.0, 0.0)
+}

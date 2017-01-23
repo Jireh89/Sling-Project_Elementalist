@@ -1,0 +1,147 @@
+class is SpriteSceneWithEntities imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var firstElement as int
+var secondElement as int
+var fireColor = Color.forRGBA(255, 0, 0, 255)
+var waterColor = Color.forRGBA(0, 0, 255, 255)
+var windColor = Color.forRGBA(255, 153, 0, 255)
+var earthColor = Color.forRGBA(0, 255, 0, 255)
+var whiteColor = Color.forRGBA(255, 255, 255, 255)
+var fireTB = TextButtonEntity.forText("FIRE")
+var waterTB = TextButtonEntity.forText("WATER")
+var windTB = TextButtonEntity.forText("WIND")
+var earthTB = TextButtonEntity.forText("EARTH")
+var gameTB = TextButtonEntity.forText("READY")
+var firstElementSprite as TextSprite
+var secondElementSprite as TextSprite
+var firstElementText = TextProperties.forText("FIRST ELEMENT")
+var secondElementText = TextProperties.forText("SECOND ELEMENT")
+
+func initialize override
+{
+	base.initialize()
+	height = getReferenceHeight()
+	width = getReferenceWidth()
+	var backgroundSprite = addTextureSpriteForSize(createTextureForImageResource("background"), width, height)
+	backgroundSprite.move(0.0, 0.0)
+	var textProp = TextProperties.forText("PICK 2 ELEMENTS")
+	textProp.setTextColor(Color.forRGB(0, 100, 255))
+	textProp.setFontSizeRelative(0.075 * height)
+	var titleSprite= addTextSprite(textProp)
+	titleSprite.move(width * 0.5 - titleSprite.getWidth() * 0.5, 0.0)
+	fireTB.setBackgroundColor(fireColor)
+	waterTB.setBackgroundColor(waterColor)
+	windTB.setBackgroundColor(windColor)
+	earthTB.setBackgroundColor(earthColor)
+	gameTB.setBackgroundColor(whiteColor)
+	addEntity(fireTB)
+	addEntity(waterTB)
+	addEntity(windTB)
+	addEntity(earthTB)
+	addEntity(gameTB)
+	fireTB.resize(width * 0.25, height * 0.2)
+	waterTB.resize(width * 0.25, height * 0.2)
+	windTB.resize(width * 0.25, height * 0.2)
+	earthTB.resize(width * 0.25, height * 0.2)
+	gameTB.resize(width * 0.25, height * 0.25)
+	fireTB.move(width * 0.125, height * 0.25)
+	waterTB.move(width * 0.625, height * 0.25)
+	windTB.move(width * 0.125, height * 0.5)
+	earthTB.move(width * 0.625, height * 0.5)
+	gameTB.move(width - gameTB.getWidth(), height * 0.75)
+	firstElementText.setTextColor(Color.forRGB(0, 100, 255))
+	firstElementText.setFontSizeRelative(0.05 * height)
+	firstElementSprite = addTextSprite(firstElementText)
+	firstElementSprite.move(width * 0.25, height * 0.75)
+	secondElementText.setTextColor(Color.forRGB(0, 100, 255))
+	secondElementText.setFontSizeRelative(0.05 * height)
+	secondElementSprite = addTextSprite(secondElementText)
+	secondElementSprite.move(width * 0.5, height * 0.75)
+	fireTB.setClickHandler(func{
+		pick(1)
+	})
+	waterTB.setClickHandler(func{
+		pick(2)
+	})
+	windTB.setClickHandler(func{
+		pick(3)
+	})
+	earthTB.setClickHandler(func{
+		pick(4)
+	})
+	gameTB.setClickHandler(func{
+		switchToGameScene()
+	})
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	firstElementSprite.setText(firstElementText.setText(toWord(firstElement)))
+	secondElementSprite.setText(secondElementText.setText(toWord(secondElement)))
+}
+
+func pick(element as int)
+{
+	if(firstElement == 0){
+		firstElement = element
+	}
+	else if(secondElement == 0){
+		secondElement = element
+	}
+	else{
+		unpick(element)
+	}
+}
+
+func unpick(element as int)
+{
+	if(element == firstElement || element == secondElement){
+		if(element == firstElement){
+			firstElement = 0
+		}
+		else{
+			secondElement = 0
+		}
+	}
+	else{
+		firstElement = secondElement
+		secondElement = element
+	}
+}
+
+func toWord(element as int) as string
+{
+	var word = "ELEMENT"
+	if(element == 1){
+		word = "FIRE"
+	}
+	else if(element == 2){
+		word = "WATER"
+	}
+	else if(element == 3){
+		word = "WIND"
+	}
+	else if(element == 4){
+		word = "EARTH"
+	}
+	return word
+}
+
+func switchToGameScene
+{
+	if(firstElement == 0 || secondElement == 0){
+		return
+	}
+	else{
+		pushScene(new GameScene(1, firstElement, secondElement))
+	}
+}
+
+func cleanup override
+{
+	removeAllEntities()
+	removeAllSprites()
+}

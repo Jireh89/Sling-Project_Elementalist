@@ -1,0 +1,14 @@
+title = "Final Project"
+vendorId = "com.game"
+depends = [
+	"cape",
+	"cave",
+	"motion"
+]
+resources = [
+	"images"
+]
+preFilters += "@motion"
+compilerOptions = {
+	"html5.readableCode" : "true"
+}
