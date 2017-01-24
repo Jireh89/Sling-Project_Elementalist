@@ -45,7 +45,7 @@ func initialize override
 	waterTB.resize(width * 0.25, height * 0.2)
 	windTB.resize(width * 0.25, height * 0.2)
 	earthTB.resize(width * 0.25, height * 0.2)
-	gameTB.resize(width * 0.25, height * 0.25)
+	gameTB.resize(width * 0.2, height * 0.2)
 	fireTB.move(width * 0.125, height * 0.25)
 	waterTB.move(width * 0.625, height * 0.25)
 	windTB.move(width * 0.125, height * 0.5)
@@ -89,7 +89,12 @@ func pick(element as int)
 		firstElement = element
 	}
 	else if(secondElement == 0){
-		secondElement = element
+		if(firstElement == element){
+			return
+		}
+		else{
+			secondElement = element
+		}
 	}
 	else{
 		unpick(element)
@@ -136,7 +141,7 @@ func switchToGameScene
 		return
 	}
 	else{
-		pushScene(new GameScene(1, firstElement, secondElement))
+		pushScene(new GameScene(firstElement, secondElement))
 	}
 }
 

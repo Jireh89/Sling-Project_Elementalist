@@ -1,0 +1,75 @@
+class is SpriteEntity imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var bulletSprite as TextureSprite
+var sc as GameScene
+var player as HeroEntity
+var monster as MonsterEntity
+var movement as double
+var element as int
+var damage as int
+
+ctor(e as int, d as int)
+{
+	element = e
+	damage = d
+}
+
+func createSprite override as Sprite
+{
+	height = layer.getReferenceHeight()
+	width = layer.getReferenceWidth()
+	sc = getScene() as GameScene
+	var bulletTexture as Texture
+	if(element == 1){
+		bulletTexture = scene.createTextureForImageResource("fireattack")
+	}
+	else if(element == 2){
+		bulletTexture = scene.createTextureForImageResource("waterattack")
+	}
+	else if(element == 3){
+		bulletTexture = scene.createTextureForImageResource("windattack")
+	}
+	else{
+		bulletTexture = scene.createTextureForImageResource("earthattack")
+	}
+	movement = width * 0.2
+	player = sc.getHero()
+	monster = sc.getMonster()
+	bulletSprite = SpriteUtil.addTextureSpriteForSize(scene, layer, bulletTexture, height * 0.04, height * 0.04)
+	bulletSprite.move(player.getX() + player.getWidth() * 0.5, player.getY())
+	return bulletSprite
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	if(sprite.getY() <= monster.getY() + monster.getHeight() * 0.5){
+		if(sprite.getX() >= monster.getX() && sprite.getX() <= monster.getX() + monster.getWidth()){
+			giveDamage()
+		}
+		vanish()
+	}
+	else{
+		sprite.move(sprite.getX(), sprite.getY() - delta * movement)
+	}
+}
+
+func giveDamage
+{
+	if(element == monster.getWeakness()){
+		monster.setLife(monster.getLife() - damage * 1.5)
+	}
+	else if(element == monster.getResistance()){
+		monster.setLife(monster.getLife() - damage * 0.5)
+	}
+	else{
+		monster.setLife(monster.getLife() - damage)
+	}
+}
+
+func vanish
+{
+	sc.removeEntity(this)
+}

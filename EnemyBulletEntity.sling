@@ -1,0 +1,43 @@
+class is SpriteEntity imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var sc as GameScene
+var bulletSprite as TextureSprite
+var player as HeroEntity
+var monster as MonsterEntity
+var movement as double
+var damage as int
+
+func createSprite override as Sprite
+{
+	height = layer.getReferenceHeight()
+	width = layer.getReferenceWidth()
+	sc = getScene() as GameScene
+	movement = width * 0.2
+	player = sc.getHero()
+	monster = sc.getMonster()
+	damage = monster.getDamage()
+	bulletSprite = SpriteUtil.addTextureSpriteForSize(scene, layer, scene.createTextureForImageResource("attack"), height * 0.04, height * 0.04)
+	bulletSprite.move(monster.getX() + monster.getWidth() * 0.5, monster.getY())
+	return bulletSprite
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	if(sprite.getY() >= player.getY() + player.getHeight() * 0.5){
+		if(sprite.getX() >= player.getX() && sprite.getX() <= player.getX() + player.getWidth()){
+			player.setLife(player.getLife() - damage)
+		}
+		vanish()
+	}
+	else{
+		sprite.move(sprite.getX(), sprite.getY() + delta * movement)
+	}
+}
+
+func vanish
+{
+	sc.removeEntity(this)
+}

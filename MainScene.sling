@@ -1,9 +1,12 @@
 class is SpriteSceneWithEntities imports cape imports cave imports motion #mainScene:
 
 var backgroundSprite as TextureSprite
+var instructionSprite as TextureSprite
 var titleSprite as TextSprite
 var height as double
 var width as double
+var audioManager as AudioManager
+var stream as AudioStream
 
 func initialize override
 {
@@ -12,18 +15,34 @@ func initialize override
 	width = getReferenceWidth()
 	backgroundSprite = addTextureSpriteForSize(createTextureForImageResource("background"), width, height)
 	backgroundSprite.move(0.0, 0.0)
+	instructionSprite = addTextureSpriteForSize(createTextureForImageResource("instruction"), width * 0.75, height * 0.75)
 	var textProp = TextProperties.forText("Elements")
 	textProp.setTextColor(Color.forRGB(0, 100, 255))
 	textProp.setFontSizeRelative(0.075 * height)
 	titleSprite= addTextSprite(textProp)
 	titleSprite.move(width * 0.5 - titleSprite.getWidth() * 0.5, 0.0)
+	instructionSprite.move(width * 0.15, titleSprite.getY() + titleSprite.getHeight())
 	var playTB = TextButtonEntity.forText("PLAY")
 	playTB.setBackgroundColor(Color.forRGBA(100, 100, 255, 100))
 	addEntity(playTB)
+	playTB.resize(width * 0.2, height * 0.2)
 	playTB.move(width * 0.5 - playTB.getWidth() * 0.5, height - playTB.getHeight())
 	playTB.setClickHandler(func{
 		switchToPickElementsScene()
 	})
+	audioManager = AudioManager.forApplication(context)
+	if(audioManager != null){
+		stream = audioManager.getStreamForResource("background")
+	}
+	onTimeToPlayStream()
+}
+
+func onTimeToPlayStream
+{
+	if(stream != null){
+		stream.play()
+		stream.setLooping(true)
+	}
 }
 
 func switchToPickElementsScene

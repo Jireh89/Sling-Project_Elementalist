@@ -6,7 +6,8 @@ depends = [
 	"motion"
 ]
 resources = [
-	"images"
+	"images",
+	"sounds"
 ]
 preFilters += "@motion"
 compilerOptions = {

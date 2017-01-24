@@ -2,13 +2,29 @@ class is SpriteSceneWithEntities imports cape imports cave imports motion:
 
 var height as double
 var width as double
-var stage as int
 var firstElement as int
 var secondElement as int
+var fontSize as double
+var whiteColor = Color.forRGBA(255, 255, 255, 255)
+var textColor = Color.forRGB(0, 100, 255)
+var leftTB = TextButtonEntity.forText("< LEFT")
+var rightTB = TextButtonEntity.forText("RIGHT >")
+var heroLifeSprite as TextSprite
+var heroLifeText = TextProperties.forText("HP: 1000")
+var firstElementTB as TextButtonEntity
+var secondElementTB as TextButtonEntity
+//var specialTB = TextButtonEntity
+var enemyLifeSprite as TextSprite
+var enemyLifeText = TextProperties.forText("LIFE: 10000")
+var timeSprite as TextSprite
+var timeText = TextProperties.forText("TIME: 00")
+var timer = new TimeValue()
+var attackTimer = new TimeValue()
+prop hero as HeroEntity
+prop monster as MonsterEntity
 
-ctor(st as int, f as int, se as int)
+ctor(f as int, se as int)
 {
-	stage = st
 	firstElement = f
 	secondElement = se
 }
@@ -20,4 +36,140 @@ func initialize override
 	width = getReferenceWidth()
 	var backgroundSprite = addTextureSpriteForSize(createTextureForImageResource("background"), width, height)
 	backgroundSprite.move(0.0, 0.0)
+	fontSize = 0.05 * height
+	//Going left and right button
+	leftTB.setBackgroundColor(whiteColor)
+	rightTB.setBackgroundColor(whiteColor)
+	addEntity(leftTB)
+	addEntity(rightTB)
+	leftTB.resize(width * 0.15, height * 0.1)
+	rightTB.resize(width * 0.15, height * 0.1)
+	leftTB.move(0.0, height - leftTB.getHeight())
+	rightTB.move(width * 0.16, height - rightTB.getHeight())
+	// hero life's UI 
+	heroLifeText.setTextColor(textColor)
+	heroLifeText.setFontSizeRelative(fontSize)
+	heroLifeSprite = addTextSprite(heroLifeText)
+	heroLifeSprite.move(width * 0.33, height - heroLifeSprite.getHeight())
+	// elements attacks button
+	firstElementTB = TextButtonEntity.forText(toWord(firstElement))
+	secondElementTB = TextButtonEntity.forText(toWord(secondElement))
+	//specialTB = TextButtonEntity.forText("RIGHT >")
+	firstElementTB.setBackgroundColor(whiteColor)
+	secondElementTB.setBackgroundColor(whiteColor)
+	//specialTB.setBackgroundColor(whiteColor)
+	addEntity(firstElementTB)
+	addEntity(secondElementTB)
+	//addEntity(specialTB)
+	firstElementTB.resize(width * 0.15, height * 0.1)
+	secondElementTB.resize(width * 0.15, height * 0.1)
+	//specialTB.resize(width * 0.15, height * 0.1)
+	firstElementTB.move(width - firstElementTB.getWidth(), height - firstElementTB.getHeight())
+	secondElementTB.move(width - secondElementTB.getWidth() * 2 - 0.001, height -secondElementTB.getHeight())
+	//specialTB.move(width - specialTB.getWidth() * 3 - 0.001, height - specialTB.getHeight())
+	// enemy life's UI 
+	enemyLifeText.setTextColor(textColor)
+	enemyLifeText.setFontSizeRelative(fontSize)
+	enemyLifeSprite = addTextSprite(enemyLifeText)
+	enemyLifeSprite.move(0, 0)
+	// time's UI
+	timeText.setTextColor(textColor)
+	timeText.setFontSizeRelative(fontSize)
+	timeSprite = addTextSprite(timeText)
+	timeSprite.move(0.67 * width, 0)
+	// declaration of entities
+	hero = new HeroEntity(firstElement, secondElement)
+	addEntity(hero)
+	monster = new MonsterEntity()
+	addEntity(monster)
+	//click handlers
+	leftTB.setClickHandler(func{
+		hero.moveLeft()
+	})
+	rightTB.setClickHandler(func{
+		hero.moveRight()
+	})
+	firstElementTB.setClickHandler(func{
+		addEntity(new BulletEntity(firstElement, hero.getDamage()))
+	})
+	secondElementTB.setClickHandler(func{
+		addEntity(new BulletEntity(secondElement, hero.getDamage()))
+	})
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	var time as int
+	if(timer.getMicroSeconds() == 0){
+		timer.setMicroSeconds(gameTime.getMicroSeconds())
+		attackTimer.setMicroSeconds(gameTime.getMicroSeconds())
+	}
+	else{
+		time = (gameTime.getMicroSeconds() - timer.getMicroSeconds()) /1000000
+		var timeValue = String.append("Time: ", String.forInteger(time))
+		timeSprite.setText(timeText.setText(timeValue))
+		var atkTime = (gameTime.getMicroSeconds() - attackTimer.getMicroSeconds()) /1000000
+		if(atkTime >= 0.7){
+			addEntity(new EnemyBulletEntity())
+			attackTimer.setMicroSeconds(gameTime.getMicroSeconds())
+		}
+	}
+	if(hero.getLife() <= 0){
+		switchToGameOverScene (0)
+	}
+	else if(monster.getLife() <= 0){
+		var result = 100 - time
+		if(result < 0){
+			result = 0
+		}
+		switchToGameOverScene (result)
+	}
+	heroLifeSprite.setText(heroLifeText.setText(String.append("HP: ", hero.getLife())))
+	enemyLifeSprite.setText(enemyLifeText.setText(String.append("LIFE: ", monster.getLife())))
+}
+
+func onKeyEvent( event as KeyEvent ) override
+{
+	base.onKeyEvent(event)
+	if(event.isKeyPress(KeyEvent.KEY_RIGHT)){
+		hero.moveRight()
+	}
+	if(event.isKeyPress(KeyEvent.KEY_LEFT)){
+		hero.moveLeft()
+	}
+	if(event.isKeyPress(KeyEvent.KEY_UP)){
+		addEntity(new BulletEntity(firstElement, hero.getDamage()))
+	}
+	if(event.isKeyPress(KeyEvent.KEY_DOWN)){
+		addEntity(new BulletEntity(secondElement, hero.getDamage()))
+	}
+}
+
+func toWord(element as int) as string
+{
+	if(element == 1){
+		return "FIRE"
+	}
+	else if(element == 2){
+		return "WATER"
+	}
+	else if(element == 3){
+		return "WIND"
+	}
+	else if(element == 4){
+		return "EARTH"
+	}
+	return "Element"
+}
+
+func switchToGameOverScene (result as int)
+{
+	pushScene(new GameOverScene(result))
+}
+
+func cleanup override
+{
+	removeAllEntities()
+	removeAllSprites()
 }

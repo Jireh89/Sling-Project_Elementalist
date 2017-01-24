@@ -1,0 +1,51 @@
+class is SpriteSceneWithEntities imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var fontSize as double
+var textColor = Color.forRGB(0, 100, 255)
+var score as int
+
+ctor(s as int)
+{
+	score = s
+}
+
+func initialize override
+{
+	base.initialize()
+	height = getReferenceHeight()
+	width = getReferenceWidth()
+	var backgroundSprite = addTextureSpriteForSize(createTextureForImageResource("background"), width, height)
+	backgroundSprite.move(0.0, 0.0)
+	fontSize = 0.1 * height
+	var textProp = TextProperties.forText("GAME OVER")
+	textProp.setTextColor(textColor)
+	textProp.setFontSizeRelative(fontSize)
+	var textSprite= addTextSprite(textProp)
+	textSprite.move(width * 0.5 - textSprite.getWidth() * 0.5, height * 0.5 - textSprite.getHeight() * 0.5)
+	var scoreProp = TextProperties.forText(String.append("SCORE: ", String.forInteger(score)))
+	scoreProp.setTextColor(textColor)
+	scoreProp.setFontSizeRelative(fontSize)
+	var scoreSprite= addTextSprite(scoreProp)
+	scoreSprite.move(width * 0.5 - scoreSprite.getWidth() * 0.5, textSprite.getY() + textSprite.getHeight())
+	var playTB = TextButtonEntity.forText("PLAY AGAIN")
+	playTB.setBackgroundColor(Color.forRGBA(100, 100, 255, 100))
+	addEntity(playTB)
+	playTB.resize(width * 0.2, height * 0.2)
+	playTB.move(width * 0.5 - playTB.getWidth() * 0.5, height - playTB.getHeight())
+	playTB.setClickHandler(func{
+		switchToMainScene()
+	})
+}
+
+func switchToMainScene
+{
+	pushScene(new MainScene())
+}
+
+func cleanup override
+{
+	removeAllEntities()
+	removeAllSprites()
+}

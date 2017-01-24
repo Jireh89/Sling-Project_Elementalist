@@ -1,0 +1,52 @@
+class is SpriteEntity imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var monsterSprite as TextureSprite
+var direction = 1
+prop life = 1000
+var sc as GameScene
+var monsterTexture as Texture
+prop resistance as int
+prop weakness as int
+prop damage = 100
+
+func createSprite override as Sprite
+{
+	height = layer.getReferenceHeight()
+	width = layer.getReferenceWidth()
+	sc = getScene() as GameScene
+	var rand = new Random().nextInt(0, 4)
+	if(rand == 2){
+		monsterTexture = scene.createTextureForImageResource("wind")
+		resistance = 4
+		weakness = 2
+	}
+	else if(rand == 3){
+		monsterTexture = scene.createTextureForImageResource("water")
+		resistance = 1
+		weakness = 3
+	}
+	else if(rand == 4){
+		monsterTexture = scene.createTextureForImageResource("fire")
+		resistance = 4
+		weakness = 2
+	}
+	else{
+		monsterTexture = scene.createTextureForImageResource("earth")
+		resistance = 3
+		weakness = 1
+	}
+	monsterSprite = SpriteUtil.addTextureSpriteForSize(scene, layer, monsterTexture, height * 0.12, height * 0.12)
+	monsterSprite.move(width * 0.5 - monsterSprite.getWidth() * 0.5, 0.05 * height)
+	return monsterSprite
+}
+
+func tick(gameTime as TimeValue, delta as double) override
+{
+	base.tick(gameTime, delta)
+	if(sprite.getX() + sprite.getWidth() >= width || sprite.getX() <= 0.0){
+		direction *= -1
+	}
+	sprite.move(sprite.getX() + delta * (0.2 * direction), sprite.getY())
+}

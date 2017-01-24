@@ -1,0 +1,46 @@
+class is SpriteEntity imports cape imports cave imports motion:
+
+var height as double
+var width as double
+var heroSprite as TextureSprite
+var movement as double
+var firstElement as int
+var secondElement as int
+prop life = 1000
+prop damage = 100
+
+ctor(f as int, s as int)
+{
+	firstElement = f
+	secondElement = s
+}
+
+func createSprite override as Sprite
+{
+	height = layer.getReferenceHeight()
+	width = layer.getReferenceWidth()
+	movement = width * 0.01
+	heroSprite = SpriteUtil.addTextureSpriteForSize(scene, layer, scene.createTextureForImageResource("hero"), height * 0.12, height * 0.12)
+	heroSprite.move(width * 0.5 - heroSprite.getWidth() * 0.5, 0.85 * height - heroSprite.getHeight())
+	return heroSprite
+}
+
+func moveLeft
+{
+	if(sprite.getX() <= 0){
+		return
+	}
+	else{
+		sprite.move(sprite.getX() - movement, sprite.getY())
+	}
+}
+
+func moveRight
+{
+	if(sprite.getX() + sprite.getWidth() >= width){
+		return
+	}
+	else{
+		sprite.move(sprite.getX() + movement, sprite.getY())
+	}
+}
